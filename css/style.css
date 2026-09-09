@@ -123,7 +123,7 @@ section { padding: 84px 0; position: relative; }
 .sec-head p { color: var(--text-mute); margin: 15px 0 0; font-size: 16.5px; }
 
 /* ---------- services ---------- */
-.svc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+.svc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 18px; }
 .svc {
   position: relative; padding: 28px 26px; border: 1px solid var(--line);
   border-radius: var(--radius); background: var(--surface);
@@ -136,7 +136,7 @@ section { padding: 84px 0; position: relative; }
 .svc-num { position: absolute; top: 22px; right: 24px; font-family: var(--display); font-weight: 800; font-size: 34px; line-height: 1; color: rgba(56,189,248,.22); }
 
 /* ---------- projects ---------- */
-.proj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 24px; }
+.proj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(430px, 100%), 1fr)); gap: 24px; }
 .proj {
   display: flex; flex-direction: column; overflow: hidden;
   border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface);
@@ -147,7 +147,7 @@ section { padding: 84px 0; position: relative; }
 .proj-shot img { width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform .5s ease; }
 .proj:hover .proj-shot img { transform: scale(1.035); }
 .proj-badge {
-  position: absolute; top: 13px; left: 13px; z-index: 2;
+  position: absolute; bottom: 13px; left: 13px; z-index: 2;
   font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
   padding: 6px 11px; border-radius: 100px; color: #cfe6f7;
   background: rgba(7, 15, 27, .82); border: 1px solid var(--line-hi);

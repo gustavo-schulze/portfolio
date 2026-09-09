@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Controle Financeiro — Projeto Demonstrativo | Gustavo Gorges</title>
+<meta name="description" content="Painel de controle financeiro com orçado x realizado, evolução do saldo e classificação automática de lançamentos. Projeto demonstrativo com dados fictícios.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --surface:rgba(148,187,233,.05); --line:rgba(56,189,248,.26); --line-hi:rgba(56,189,248,.5);
+  --cyan:#38bdf8; --green:#22c55e; --amber:#f59e0b; --violet:#a78bfa; --orange:#fb7a3c; --red:#f87171;
+  --text:#f4f8fc; --soft:#c4d2e2; --mute:#a6b8cc;
+  --display:'Archivo','Helvetica Neue',Helvetica,Arial,sans-serif;
+  --body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(120% 80% at 50% 0%,#12324c 0%,#0c1f34 45%,#070f1b 100%);
+  background-attachment:fixed;color:var(--text);font-family:var(--body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);font-weight:800;margin:0;line-height:1.15;letter-spacing:.01em}
+a{color:var(--cyan);text-decoration:none}
+.wrap{max-width:1320px;margin:0 auto;padding:26px 24px 48px}
+.topbar{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:flex-end;
+  padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:24px}
+.topbar > div:first-child{flex:1 1 400px;min-width:0}
+.back{font-size:13px;color:var(--mute);display:flex;width:fit-content;white-space:nowrap;align-items:center;gap:7px;margin-bottom:12px}
+.back:hover{color:var(--cyan)}
+h1{font-size:29px;text-transform:uppercase}
+.sub{color:var(--mute);font-size:14.5px;margin-top:6px}
+.demo-flag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:#ffd0ae;background:rgba(249,115,22,.13);border:1px solid rgba(249,115,22,.4);
+  border-radius:100px;padding:6px 13px;margin-bottom:13px;white-space:nowrap}
+.filters{display:flex;flex-direction:column;gap:7px}
+.flabel{font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--cyan)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--body);font-size:13px;font-weight:500;padding:7px 14px;border-radius:100px;cursor:pointer;
+  background:rgba(56,189,248,.06);border:1px solid var(--line);color:var(--soft);transition:all .16s ease}
+.chip:hover{border-color:var(--line-hi);color:var(--text)}
+.chip[aria-pressed="true"]{background:var(--cyan);border-color:var(--cyan);color:#06202f;font-weight:600}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:20px}
+.kpi{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:20px 22px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent,var(--cyan))}
+.k-label{font-size:11.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--mute)}
+.k-val{font-family:var(--display);font-weight:800;font-size:29px;line-height:1.1;margin:9px 0 6px;font-variant-numeric:tabular-nums}
+.k-note{font-size:12.7px;color:var(--mute)}
+.k-note b{font-weight:600}
+.pos{color:var(--green)} .neg{color:var(--red)}
+
+.grid{display:grid;gap:16px;margin-bottom:16px}
+.g-2{grid-template-columns:1fr 1fr}
+.panel{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:20px 22px 18px;min-width:0}
+.p-head{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+.p-head h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+.p-note{font-size:12.3px;color:var(--mute)}
+svg{display:block;width:100%;overflow:visible}
+.gl{stroke:rgba(148,187,233,.13);stroke-width:1}
+.ax{fill:var(--mute);font-size:11.5px;font-family:var(--body)}
+.legend{display:flex;flex-wrap:wrap;gap:15px;font-size:12.3px;color:var(--mute);margin-top:13px}
+.legend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:6px;vertical-align:middle}
+
+/* orcamento */
+.budget{display:flex;flex-direction:column;gap:15px}
+.brow{display:grid;grid-template-columns:132px 1fr 150px;gap:14px;align-items:center;font-size:14px}
+.bname{color:var(--soft);display:flex;align-items:center;gap:9px;min-width:0}
+.bname i{width:9px;height:9px;border-radius:2px;flex:0 0 auto}
+.btrack{display:block;height:9px;border-radius:5px;background:rgba(148,187,233,.08);position:relative;overflow:hidden}
+.bfill{display:block;height:100%;border-radius:5px}
+.bmark{position:absolute;top:-3px;width:2px;height:15px;background:rgba(244,248,252,.55);border-radius:1px}
+.bval{text-align:right;font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
+.bval b{color:var(--soft);font-weight:600}
+.over{color:#fca5a5}
+
+table{width:100%;border-collapse:collapse;font-size:13.8px}
+th{text-align:left;font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--cyan);
+  padding:0 10px 11px;border-bottom:1px solid var(--line)}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+td{padding:10px;border-bottom:1px solid rgba(56,189,248,.1);color:var(--soft)}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:rgba(56,189,248,.05)}
+.badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:100px;display:inline-block;
+  background:rgba(56,189,248,.11);border:1px solid rgba(56,189,248,.24);color:var(--soft)}
+.auto{font-size:10.5px;color:var(--green);font-weight:600;letter-spacing:.05em}
+
+.foot{margin-top:26px;padding-top:18px;border-top:1px solid var(--line);color:var(--mute);font-size:12.7px;
+  display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
+@media (max-width:980px){ .g-2{grid-template-columns:1fr} .brow{grid-template-columns:112px 1fr;grid-template-areas:'n b' 'v v'} .bval{text-align:left} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div>
+      <a class="back" href="../../index.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Voltar ao portfólio
+      </a>
+      <div class="demo-flag">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5v.01"/></svg>
+        Projeto demonstrativo · dados fictícios
+      </div>
+      <h1>Controle Financeiro</h1>
+      <div class="sub">Orçado × realizado, evolução do saldo e classificação automática de lançamentos.</div>
+    </div>
+    <div class="filters">
+      <span class="flabel">Mês de referência</span>
+      <div class="chips" id="f-mes"></div>
+    </div>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid g-2">
+    <div class="panel">
+      <div class="p-head">
+        <h2>Receitas x Despesas</h2>
+        <span class="p-note">últimos 12 meses · R$</span>
+      </div>
+      <svg id="c-barras" viewBox="0 0 560 250" role="img" aria-label="Receitas e despesas por mês"></svg>
+      <div class="legend">
+        <span><i style="background:#22c55e"></i>Receitas</span>
+        <span><i style="background:#fb7a3c"></i>Despesas</span>
+        <span><i style="background:#38bdf8"></i>Saldo acumulado</span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="p-head">
+        <h2>Orçado × realizado</h2>
+        <span class="p-note" id="note-orc"></span>
+      </div>
+      <div class="budget" id="budget"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="p-head">
+      <h2>Lançamentos do mês</h2>
+      <span class="p-note"><span class="auto">CLASSIFICAÇÃO AUTOMÁTICA</span> · categoria inferida pela descrição</span>
+    </div>
+    <table>
+      <thead>
+        <tr><th style="width:78px">Data</th><th>Descrição</th><th>Categoria</th><th>Origem</th><th class="num">Valor</th></tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="foot">
+    <span>Projeto demonstrativo em HTML, CSS e JavaScript puro. A classificação por palavra-chave reproduz a mesma lógica aplicada em planilhas com VBA e em rotinas Python.</span>
+    <span>Gustavo Gorges · Soluções em Dados &amp; Tecnologia</span>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var CATS = [
+    { nome:'Moradia',      cor:'#38bdf8', orc:2400 },
+    { nome:'Alimentação',  cor:'#22c55e', orc:1450 },
+    { nome:'Transporte',   cor:'#f59e0b', orc: 780 },
+    { nome:'Saúde',        cor:'#a78bfa', orc: 520 },
+    { nome:'Lazer',        cor:'#fb7a3c', orc: 620 },
+    { nome:'Educação',     cor:'#22d3ee', orc: 390 }
+  ];
+  // palavras-chave -> categoria (mesma lógica de um classificador em VBA/Python)
+  var REGRAS = [
+    { chave:['aluguel','condominio','energia','agua','internet'], cat:'Moradia' },
+    { chave:['mercado','padaria','restaurante','ifood','feira'],  cat:'Alimentação' },
+    { chave:['posto','uber','onibus','estacionamento'],           cat:'Transporte' },
+    { chave:['farmacia','consulta','plano de saude','exame'],     cat:'Saúde' },
+    { chave:['cinema','streaming','bar','viagem'],                cat:'Lazer' },
+    { chave:['curso','livraria','mensalidade'],                   cat:'Educação' }
+  ];
+  var LANC = [
+    { d: 2, desc:'Aluguel apartamento',        origem:'Débito automático', v:-1850.00 },
+    { d: 3, desc:'Mercado São Jorge',          origem:'Cartão de crédito',  v: -412.87 },
+    { d: 5, desc:'Energia elétrica',           origem:'Débito automático', v: -248.60 },
+    { d: 7, desc:'Posto Shell — combustível',  origem:'Cartão de débito',   v: -260.00 },
+    { d: 9, desc:'Streaming mensal',           origem:'Cartão de crédito',  v:  -55.90 },
+    { d:11, desc:'Farmácia Central',           origem:'Cartão de débito',   v: -136.40 },
+    { d:14, desc:'Restaurante — almoço',       origem:'Cartão de crédito',  v: -189.20 },
+    { d:16, desc:'Internet fibra',             origem:'Débito automático', v: -129.90 },
+    { d:19, desc:'Curso online de Python',     origem:'Cartão de crédito',  v: -297.00 },
+    { d:22, desc:'Uber — deslocamentos',       origem:'Cartão de crédito',  v:  -94.30 },
+    { d:25, desc:'Cinema',                     origem:'Cartão de débito',   v:  -78.00 },
+    { d:27, desc:'Mercado — reposição',        origem:'Cartão de débito',   v: -206.55 }
+  ];
+
+  function classifica(desc) {
+    var d = desc.toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '');
+    for (var i = 0; i < REGRAS.length; i++) {
+      for (var j = 0; j < REGRAS[i].chave.length; j++) {
+        if (d.indexOf(REGRAS[i].chave[j]) !== -1) return REGRAS[i].cat;
+      }
+    }
+    return 'Outros';
+  }
+  function corDe(cat) {
+    var f = CATS.filter(function (c) { return c.nome === cat; })[0];
+    return f ? f.cor : '#94a3b8';
+  }
+  function rng(seed) {
+    var s = seed >>> 0;
+    return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  }
+  function brl(v) {
+    return (v < 0 ? '-' : '') + 'R$ ' + Math.abs(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function brl0(v) {
+    return 'R$ ' + Math.round(Math.abs(v)).toLocaleString('pt-BR');
+  }
+
+  var estado = { mes: 9 }; // Out (índice 9)
+
+  // série anual determinística
+  var r0 = rng(20250101);
+  var SERIE = MESES.map(function (_, i) {
+    var rec = 8200 + Math.round(r0() * 900) + (i === 11 ? 4100 : 0);   // 13o em dezembro
+    var desp = 5900 + Math.round(r0() * 1250) + (i === 0 ? 900 : 0);   // IPTU/matrícula em janeiro
+    return { rec: rec, desp: desp };
+  });
+
+  function renderKpis() {
+    var m = SERIE[estado.mes];
+    var saldo = m.rec - m.desp;
+    var taxa = saldo / m.rec * 100;
+    var acum = SERIE.slice(0, estado.mes + 1).reduce(function (a, x) { return a + x.rec - x.desp; }, 0);
+    var mAnt = SERIE[estado.mes - 1] || m;
+    var varDesp = (m.desp / mAnt.desp - 1) * 100;
+
+    var itens = [
+      { l:'Receitas do mês', v:brl0(m.rec), cor:'#22c55e',
+        n:'entradas registradas no período' },
+      { l:'Despesas do mês', v:brl0(m.desp), cor:'#fb7a3c',
+        n:'<b class="' + (varDesp <= 0 ? 'pos' : 'neg') + '">' + (varDesp > 0 ? '+' : '') +
+          varDesp.toFixed(1).replace('.', ',') + '%</b> vs. mês anterior' },
+      { l:'Saldo do mês', v:brl0(saldo), cor:'#38bdf8',
+        n:'taxa de poupança de <b>' + taxa.toFixed(1).replace('.', ',') + '%</b>' },
+      { l:'Acumulado no ano', v:brl0(acum), cor:'#a78bfa',
+        n:'de janeiro a ' + MESES[estado.mes] }
+    ];
+    document.getElementById('kpis').innerHTML = itens.map(function (k) {
+      return '<div class="kpi" style="--accent:' + k.cor + '">' +
+        '<div class="k-label">' + k.l + '</div>' +
+        '<div class="k-val">' + k.v + '</div>' +
+        '<div class="k-note">' + k.n + '</div></div>';
+    }).join('');
+  }
+
+  function renderBarras() {
+    var W = 560, H = 250, mL = 46, mR = 12, mT = 12, mB = 28;
+    var iw = W - mL - mR, ih = H - mT - mB;
+    var max = Math.max.apply(null, SERIE.map(function (s) { return Math.max(s.rec, s.desp); })) * 1.14;
+    var slot = iw / MESES.length, bw = Math.min(11, slot * 0.31);
+    var y = function (v) { return mT + ih - (v / max) * ih; };
+    var s = '';
+
+    for (var g = 0; g <= 4; g++) {
+      var gv = max / 4 * g, gy = y(gv);
+      s += '<line class="gl" x1="' + mL + '" y1="' + gy.toFixed(1) + '" x2="' + (W - mR) + '" y2="' + gy.toFixed(1) + '"/>';
+      s += '<text class="ax" x="' + (mL - 9) + '" y="' + (gy + 4).toFixed(1) + '" text-anchor="end">' + Math.round(gv / 1000) + 'k</text>';
+    }
+
+    var acum = 0, pts = [];
+    var maxAcum = 0, run = 0;
+    SERIE.forEach(function (m) { run += m.rec - m.desp; if (run > maxAcum) maxAcum = run; });
+
+    SERIE.forEach(function (m, i) {
+      var cx = mL + slot * i + slot / 2;
+      var ativo = i === estado.mes;
+      var op = ativo ? '1' : '.62';
+      s += '<rect x="' + (cx - bw - 1.5).toFixed(1) + '" y="' + y(m.rec).toFixed(1) + '" width="' + bw.toFixed(1) +
+           '" height="' + (mT + ih - y(m.rec)).toFixed(1) + '" rx="2.5" fill="#22c55e" opacity="' + op + '"/>';
+      s += '<rect x="' + (cx + 1.5).toFixed(1) + '" y="' + y(m.desp).toFixed(1) + '" width="' + bw.toFixed(1) +
+           '" height="' + (mT + ih - y(m.desp)).toFixed(1) + '" rx="2.5" fill="#fb7a3c" opacity="' + op + '"/>';
+      if (ativo) {
+        s += '<rect x="' + (cx - slot / 2 + 1).toFixed(1) + '" y="' + mT + '" width="' + (slot - 2).toFixed(1) +
+             '" height="' + ih + '" rx="5" fill="rgba(56,189,248,.09)"/>';
+      }
+      s += '<text class="ax" x="' + cx.toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle"' +
+           (ativo ? ' style="fill:#f4f8fc;font-weight:600"' : '') + '>' + MESES[i] + '</text>';
+      acum += m.rec - m.desp;
+      pts.push([cx, mT + ih - (acum / maxAcum) * ih * 0.88]);
+    });
+
+    s += '<path d="' + pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ') +
+         '" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity=".9"/>';
+    pts.forEach(function (p, i) {
+      if (i === estado.mes) s += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="4" fill="#0c1f34" stroke="#38bdf8" stroke-width="2.4"/>';
+    });
+
+    document.getElementById('c-barras').innerHTML = s;
+  }
+
+  function renderOrcamento() {
+    var r = rng(1000 + estado.mes * 37);
+    var estouros = 0;
+    var html = CATS.map(function (c) {
+      var real = Math.round(c.orc * (0.66 + r() * 0.62));
+      var p = real / c.orc;
+      if (p > 1) estouros++;
+      var w = Math.min(p, 1.35) / 1.35 * 100;
+      var marca = (1 / 1.35) * 100;
+      var cor = p > 1 ? '#f87171' : c.cor;
+      return '<div class="brow">' +
+        '<span class="bname"><i style="background:' + c.cor + '"></i>' + c.nome + '</span>' +
+        '<span class="btrack"><span class="bfill" style="width:' + w.toFixed(1) + '%;background:' + cor + '"></span>' +
+          '<span class="bmark" style="left:' + marca.toFixed(1) + '%"></span></span>' +
+        '<span class="bval"><b class="' + (p > 1 ? 'over' : '') + '">' + brl0(real) + '</b> / ' + brl0(c.orc) +
+          ' &middot; <span class="' + (p > 1 ? 'over' : '') + '">' + Math.round(p * 100) + '%</span></span>' +
+      '</div>';
+    }).join('');
+    document.getElementById('budget').innerHTML = html;
+    document.getElementById('note-orc').innerHTML = estouros
+      ? '<span style="color:#fca5a5">' + estouros + ' categoria(s) acima do orçamento</span>'
+      : '<span style="color:#6ee7a5">todas dentro do orçamento</span>';
+  }
+
+  function renderTabela() {
+    var mes = String(estado.mes + 1).padStart(2, '0');
+    document.getElementById('tbody').innerHTML = LANC.map(function (l) {
+      var cat = classifica(l.desc);
+      return '<tr>' +
+        '<td style="color:#a6b8cc">' + String(l.d).padStart(2, '0') + '/' + mes + '</td>' +
+        '<td style="color:#f4f8fc">' + l.desc + '</td>' +
+        '<td><span class="badge" style="border-color:' + corDe(cat) + '55;color:' + corDe(cat) + '">' + cat + '</span></td>' +
+        '<td style="color:#a6b8cc">' + l.origem + '</td>' +
+        '<td class="num" style="color:#fca5a5">' + brl(l.v) + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function renderChips() {
+    var el = document.getElementById('f-mes');
+    el.innerHTML = '';
+    MESES.forEach(function (m, i) {
+      var b = document.createElement('button');
+      b.className = 'chip'; b.type = 'button'; b.textContent = m;
+      b.setAttribute('aria-pressed', String(i === estado.mes));
+      b.addEventListener('click', function () { estado.mes = i; render(); });
+      el.appendChild(b);
+    });
+  }
+
+  function render() {
+    renderChips(); renderKpis(); renderBarras(); renderOrcamento(); renderTabela();
+  }
+  render();
+})();
+</script>
+</body>
+</html>

@@ -25,8 +25,7 @@ jobs:
           set -e
           rm -f /tmp/broken-links.txt
           # extrai hrefs/src locais (ignora http(s), mailto, tel, #ancora) e confere se o arquivo existe.
-          # a checagem roda dentro do while (subshell do pipe), entao o resultado vai para um
-          # arquivo em vez de uma variavel de shell - senao "fail=1" se perde ao sair do pipe.
+          # o resultado vai para um arquivo (nao uma variavel), pois o loop roda em subshell.
           grep -rhoE '(href|src)="[^"]+"' --include="*.html" . \
             | sed -E 's/^(href|src)="//; s/"$//' \
             | grep -Ev '^(https?:|mailto:|tel:|#|data:)' \

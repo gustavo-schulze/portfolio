@@ -1,7 +1,7 @@
 /* Gustavo Gorges - Solucoes em Dados & Tecnologia
    Base compartilhada pelos projetos demonstrativos (dashboard-vendas,
-   controle-financeiro). Extraida para eliminar duplicacao entre os dois
-   arquivos, que antes repetiam ~90% deste CSS inline. */
+   controle-financeiro): fundo, kpis, paineis, tabelas e chips. Cada pagina
+   mantem em seu próprio <style> só o que é específico dela. */
 
 :root{
   --bg:#070f1b; --mid:#0c1f34; --surface:rgba(148,187,233,.05); --surface2:rgba(148,187,233,.09);
@@ -19,9 +19,6 @@ h1,h2,h3{font-family:var(--display);font-weight:800;margin:0;line-height:1.15;le
 a{color:var(--cyan);text-decoration:none}
 a:hover{color:#7dd3fc}
 a:focus-visible,button:focus-visible,.chip:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:4px}
-.skip-link{position:absolute;left:-9999px;top:0;z-index:100;background:var(--cyan);color:#06202f;
-  font-weight:700;padding:10px 18px;border-radius:0 0 8px 0}
-.skip-link:focus{left:0}
 .wrap{max-width:1320px;margin:0 auto;padding:26px 24px 48px}
 
 /* topbar */

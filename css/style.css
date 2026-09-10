@@ -93,10 +93,8 @@ h1, h2, h3 { font-family: var(--display); font-weight: 800; line-height: 1.12; m
   transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
   min-height: 48px;
 }
-/* Solido (nao gradiente) em repouso: #b74a08 rende 5.25:1 com texto branco,
-   com folga sobre o minimo WCAG AA (4.5:1) para texto normal - o laranja
-   --orange-deep (#f97316) original só passava em 2.8:1. O gradiente mais claro
-   fica reservado para o hover, onde o contraste não é o estado de repouso. */
+/* Cor solida em repouso para manter contraste AA com o texto branco (5.25:1);
+   o gradiente mais claro fica só no hover. */
 .btn-primary { background: #b74a08; color: #fff; box-shadow: 0 8px 26px rgba(183, 74, 8, .32); }
 .btn-primary:hover { background: linear-gradient(135deg, var(--orange-deep), #fb923c); color: #fff; transform: translateY(-2px); box-shadow: 0 12px 32px rgba(249, 115, 22, .38); }
 .btn-ghost { background: rgba(56, 189, 248, .07); border-color: var(--line-hi); color: var(--text); }

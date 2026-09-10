@@ -3,8 +3,7 @@
 Portfólio de serviços em Excel avançado, Python, Power BI, automação de
 processos e desenvolvimento web.
 
-**Site:** https://SEU-USUARIO.github.io/portfolio/
-*(atualize esta URL depois de publicar)*
+**Site:** https://gustavo-schulze.github.io/portfolio/
 
 ## Projetos demonstrativos
 

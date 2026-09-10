@@ -50,6 +50,28 @@ python -m http.server 8000
 HTML, CSS e JavaScript puro. **Sem framework, sem build, sem dependências.**
 A única requisição externa é a fonte (Google Fonts). Publicado no GitHub Pages.
 
+## Segurança
+
+Site estático, sem backend, sem formulário, sem dependência (nenhum pacote
+para ter CVE ou ficar desatualizado). Hardening aplicado via `<meta>` em
+todas as páginas HTML:
+
+- **Content-Security-Policy** restritiva (`default-src 'self'`, só permite
+  a fonte do Google Fonts e nada de `connect-src`)
+- **Referrer-Policy**: `strict-origin-when-cross-origin`
+- **Permissions-Policy**: bloqueia câmera, microfone e geolocalização
+- Todo link externo usa `rel="noopener noreferrer"`
+
+**Limitação conhecida do GitHub Pages:** headers HTTP reais como
+`Strict-Transport-Security` (HSTS) e `X-Frame-Options` só podem ser enviados
+pelo servidor — não existe `<meta>` equivalente, e o GitHub Pages não deixa
+configurar headers customizados. O `frame-ancestors 'none'` da CSP cobre a
+proteção contra clickjacking na prática (é respeitado por navegadores
+modernos mesmo vindo de `<meta>`), mas não é tecnicamente um substituto
+completo de `X-Frame-Options` em navegadores muito antigos. Se um dia isso
+for servido por trás de um proxy próprio (Cloudflare, Netlify, Vercel), vale
+configurar os headers reais lá.
+
 ## Personalizar
 
 - **Cores e tipografia:** variáveis no `:root` de `css/style.css`

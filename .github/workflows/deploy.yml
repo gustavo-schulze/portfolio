@@ -1,0 +1,61 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checar links internos quebrados
+        run: |
+          set -e
+          rm -f /tmp/broken-links.txt
+          # extrai hrefs/src locais (ignora http(s), mailto, tel, #ancora) e confere se o arquivo existe.
+          # a checagem roda dentro do while (subshell do pipe), entao o resultado vai para um
+          # arquivo em vez de uma variavel de shell - senao "fail=1" se perde ao sair do pipe.
+          grep -rhoE '(href|src)="[^"]+"' --include="*.html" . \
+            | sed -E 's/^(href|src)="//; s/"$//' \
+            | grep -Ev '^(https?:|mailto:|tel:|#|data:)' \
+            | sort -u \
+            | while read -r ref; do
+                clean="${ref%%#*}"
+                clean="${clean%%\?*}"
+                [ -z "$clean" ] && continue
+                for base in . projetos/dashboard-vendas projetos/controle-financeiro projetos/automacao-relatorios projetos/scraper-precos; do
+                  if [ -f "$base/$clean" ] || [ -d "$base/$clean" ]; then
+                    continue 2
+                  fi
+                done
+                echo "link local quebrado: $ref" | tee -a /tmp/broken-links.txt
+              done
+          [ ! -s /tmp/broken-links.txt ]
+
+      - name: Preparar artefato do Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publicar no GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

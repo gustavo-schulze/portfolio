@@ -42,6 +42,28 @@
     });
   }
 
+  // ---------- aria-current no item do menu correspondente à seção visível ----------
+  var navAncoras = links ? links.querySelectorAll('a[href^="#"]') : [];
+  var secoes = [];
+  navAncoras.forEach(function (a) {
+    var alvo = document.getElementById(a.getAttribute('href').slice(1));
+    if (alvo) secoes.push({ link: a, el: alvo });
+  });
+
+  if (secoes.length && 'IntersectionObserver' in window) {
+    var navObs = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (entrada) {
+        var item = secoes.filter(function (s) { return s.el === entrada.target; })[0];
+        if (!item) return;
+        if (entrada.isIntersecting) {
+          secoes.forEach(function (s) { s.link.removeAttribute('aria-current'); });
+          item.link.setAttribute('aria-current', 'true');
+        }
+      });
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    secoes.forEach(function (s) { navObs.observe(s.el); });
+  }
+
   // ---------- revelação ao rolar ----------
   var alvos = document.querySelectorAll('.rv');
 

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gustavo-schulze.github.io/portfolio/sitemap.xml

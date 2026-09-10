@@ -81,6 +81,7 @@ h1, h2, h3 { font-family: var(--display); font-weight: 800; line-height: 1.12; m
 .nav-links { display: flex; gap: 28px; align-items: center; }
 .nav-links a { color: var(--text-soft); font-size: 14.5px; font-weight: 500; letter-spacing: .02em; }
 .nav-links a:hover { color: var(--cyan); }
+.nav-links a[aria-current="true"] { color: var(--cyan); }
 .nav-toggle { display: none; background: none; border: 1px solid var(--line); border-radius: 9px; padding: 7px 9px; cursor: pointer; }
 
 /* ---------- buttons ---------- */
@@ -92,8 +93,12 @@ h1, h2, h3 { font-family: var(--display); font-weight: 800; line-height: 1.12; m
   transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
   min-height: 48px;
 }
-.btn-primary { background: linear-gradient(135deg, var(--orange-deep), #fb923c); color: #fff; box-shadow: 0 8px 26px rgba(249, 115, 22, .28); }
-.btn-primary:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 12px 32px rgba(249, 115, 22, .38); }
+/* Solido (nao gradiente) em repouso: #b74a08 rende 5.25:1 com texto branco,
+   com folga sobre o minimo WCAG AA (4.5:1) para texto normal - o laranja
+   --orange-deep (#f97316) original só passava em 2.8:1. O gradiente mais claro
+   fica reservado para o hover, onde o contraste não é o estado de repouso. */
+.btn-primary { background: #b74a08; color: #fff; box-shadow: 0 8px 26px rgba(183, 74, 8, .32); }
+.btn-primary:hover { background: linear-gradient(135deg, var(--orange-deep), #fb923c); color: #fff; transform: translateY(-2px); box-shadow: 0 12px 32px rgba(249, 115, 22, .38); }
 .btn-ghost { background: rgba(56, 189, 248, .07); border-color: var(--line-hi); color: var(--text); }
 .btn-ghost:hover { color: var(--text); background: rgba(56, 189, 248, .14); transform: translateY(-2px); }
 
@@ -166,6 +171,7 @@ section { padding: 84px 0; position: relative; }
 
 /* ---------- about ---------- */
 .about { display: grid; grid-template-columns: 1.15fr .85fr; gap: 52px; align-items: start; }
+.sobre-h2 { font-size: clamp(26px, 3.6vw, 38px); text-transform: uppercase; margin-bottom: 24px; }
 .about p { color: var(--text-mute); font-size: 16.5px; margin: 0 0 17px; }
 .about p strong { color: var(--text-soft); font-weight: 600; }
 .stack-box { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 26px; }
@@ -184,7 +190,7 @@ section { padding: 84px 0; position: relative; }
 .cta-box h2 { font-size: clamp(25px, 3.5vw, 37px); text-transform: uppercase; margin-bottom: 15px; }
 .cta-box h2 .hl { color: var(--orange); }
 .cta-box > p { color: var(--text-mute); max-width: 54ch; margin: 0 auto 32px; font-size: 16.5px; }
-.contact-list { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-bottom: 32px; }
+.contact-list { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-bottom: 32px; font-style: normal; }
 .contact-item {
   display: inline-flex; align-items: center; gap: 11px; padding: 13px 20px;
   border: 1px solid var(--line); border-radius: 11px; background: rgba(7,15,27,.4);
